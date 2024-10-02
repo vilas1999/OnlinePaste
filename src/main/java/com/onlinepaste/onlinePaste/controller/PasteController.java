@@ -1,10 +1,11 @@
 package com.onlinepaste.onlinePaste.controller;
 
-import com.onlinepaste.onlinePaste.entity.Paste;
+import com.onlinepaste.onlinePaste.entity.dto.PasteDto;
 import com.onlinepaste.onlinePaste.service.PasteService;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.util.ToStringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,22 +18,22 @@ public class PasteController {
     private final PasteService pasteService;
 
     @RequestMapping("/paste")
-    public List<Paste> getPaste() {
+    public List<PasteDto> getPaste() {
         return pasteService.getPaste();
     }
 
     @RequestMapping("/paste/{id}")
-    public Paste getPaste(@PathVariable String id) {
-        return pasteService.getPaste(id);
+    public ResponseEntity<PasteDto> getPaste(@PathVariable Long id) {
+        return ResponseEntity.ok(pasteService.getPaste(id));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/paste")
-    public void addPaste(@RequestBody Paste paste) {
-        pasteService.addPaste(paste);
+    public ResponseEntity<PasteDto> addPaste(@RequestBody PasteDto pasteDto) {
+        return new ResponseEntity<>(pasteService.addPaste(pasteDto), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/paste/{id}")
-    public void deletePaste(@PathVariable String id) {
+    public void deletePaste(@PathVariable Long id) {
         pasteService.deletePaste(id);
     }
 }

@@ -1,39 +1,54 @@
 package com.onlinepaste.onlinePaste.service;
 
 import com.onlinepaste.onlinePaste.entity.Paste;
+import com.onlinepaste.onlinePaste.entity.dto.PasteDto;
+import com.onlinepaste.onlinePaste.exception.PasteNotFoundException;
+import com.onlinepaste.onlinePaste.mapper.PasteMapper;
+import com.onlinepaste.onlinePaste.repository.PasteRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class PasteService {
 
-    private List<Paste> list = new ArrayList<>();
+    @Autowired
+    private final PasteRepository pasteRepository;
 
-    public void addPaste(Paste paste) {
-        list.add(paste);
+    public PasteDto addPaste(PasteDto pasteDto) {
+        if (Objects.isNull(pasteDto.getPasteName()) || pasteDto.getPasteName().isEmpty()) {
+            pasteDto.setPasteName(String.valueOf(Instant.now().toEpochMilli()));
+        }
+        Paste paste = PasteMapper.mapToPaste(pasteDto);
+        Paste savedPaste = pasteRepository.save(paste);
+        return PasteMapper.mapToPasteDto(savedPaste);
     }
 
-    public Paste getPaste(String id) {
-        return list
+    public PasteDto getPaste(Long id) {
+        Paste paste = pasteRepository
+                .findById(id)
+                .orElseThrow(() -> new PasteNotFoundException("Paste not found with id: " + id));
+        return PasteMapper.mapToPasteDto(paste);
+    }
+
+    public List<PasteDto> getPaste() {
+        List<PasteDto> pasteList = new ArrayList<>();
+        pasteRepository
+                .findAll()
                 .stream()
-                .filter(p -> Objects.equals(p.getId(), id))
-                .findFirst().orElse(Paste.builder()
-                        .content("no paste found")
-                        .build());
+                .map(PasteMapper::mapToPasteDto)
+                .forEach(pasteList::add);
+        return pasteList;
     }
 
-    public List<Paste> getPaste() {
-        return list;
-    }
-
-    public void deletePaste(String id) {
-        list = list
-                .stream()
-                .filter(paste -> !paste.getId().equals(id))
-                .toList();
+    public void deletePaste(Long id) {
+        pasteRepository.deleteById(id);
     }
 }

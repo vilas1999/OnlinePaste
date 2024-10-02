@@ -1,19 +1,28 @@
 package com.onlinepaste.onlinePaste.entity;
 
 
-import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @Setter
+@Entity
+@NoArgsConstructor
 public class Paste {
 
-    private final String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private final String content;
+    @Column(name = "paste_name")
+    private String pasteName;
+
+    @Column(name = "content")
+    private String content;
+
+    @Column(name = "user_id")
+    private String userId;
 }
